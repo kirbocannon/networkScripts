@@ -1,3 +1,10 @@
+# This simple script will backup the running config on an Cisco IOSv (Tested only in VIRL for now)
+# device with SSH enabled. The script will also copy the newest backups locally (in the same directory
+# as the python script, look for the hostname, and use that and date/time information to rename the backup
+# file to something useful. This had to be done because I found no other way to scan thru files with this FTP module
+# also some file cleanup  and connection termination is done at the end
+
+
 from fabric.api import env, open_shell
 from fabric import tasks, exceptions
 from datetime import datetime
