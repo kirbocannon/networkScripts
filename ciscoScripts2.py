@@ -48,18 +48,10 @@ def renameFTPFile(): # rename FTP files
 
 
 if __name__ == '__main__':
-
     tasks.execute(getBackupCfg)
     tasks.disconnect_all()
     renameFTPFile()
 
-
-
-
-
-
-#    for key, value in task_hostname.items(): # iterate over dict, asign hostname to hostname variable
-#        hostname = value
 
 
 
