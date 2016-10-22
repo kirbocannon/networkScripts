@@ -1,4 +1,4 @@
-from fabric.api import run, env, open_shell, execute
+from fabric.api import env, open_shell
 from fabric import tasks, exceptions
 from datetime import datetime
 from ftplib import FTP, error_perm
