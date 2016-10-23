@@ -40,7 +40,6 @@ def getBackupCfg(): # run backup commands
 
 if __name__ == '__main__':
     hostname = tasks.execute(getHostname)
-    #print(hostname)
     tasks.execute(getBackupCfg)
     tasks.disconnect_all()
 
