@@ -24,14 +24,12 @@ def getHostname():
 
 def getBackupCfg(): # run backup commands
     try:
-        num = 0
         open_shell("copy run ftp://cisco@172.16.1.200/{}-config-{}-{}-{}-{}-{}-{} \n" # backup
                    "\n"
                    "\n"
                    "\n"
                    "exit".format(env.host, time.hour, time.minute, time.second,
                                  time.month, time.day, time.year))
-        num +=1
     except exceptions.NetworkError as e:
         print("Issue with a node:", e)
 
