@@ -1,8 +1,7 @@
-# This simple script will backup the running config on an Cisco IOSv (Tested only in VIRL for now)
-# device with SSH enabled. The script will also copy the newest backups locally (in the same directory
-# as the python script, look for the hostname, and use that and date/time information to rename the backup
-# file to something useful. This had to be done because I found no other way to scan thru files with this FTP module
-# also some file cleanup  and connection termination is done at the end
+# This simple script will first get the hostname of a switch for later use in the filename creation. Then, it will
+# backup the running config on an Cisco IOSv (Tested only in VIRL for now)
+# device with SSH enabled. The script will send the command to backup to an ftp server (although you can
+# specify any type of server, and then it will name the file appropriately with the time and hostname.
 
 
 from fabric.api import env, open_shell, run, settings, hide
@@ -17,56 +16,33 @@ env.password = 'cisco' # master password
 time = datetime.now()
 env.parallel = True # run parallel execution for simultaneous connections
 env.disable_known_hosts = True # disable host key checking
-hostname = ""
 
 def getHostname():
-    global hostname
     with settings(hide('stdout')): # suppress uneeded output
         hostname = run("show run | i hostname", shell=False)
         return hostname
 
 def getBackupCfg(): # run backup commands
     try:
-        open_shell("copy run ftp://cisco@172.16.1.200 \n" # backup
+        num = 0
+        open_shell("copy run ftp://cisco@172.16.1.200/{}-config-{}-{}-{}-{}-{}-{} \n" # backup
                    "\n"
                    "\n"
                    "\n"
-                   "exit")
+                   "exit".format(env.host, time.hour, time.minute, time.second,
+                                 time.month, time.day, time.year))
+        num +=1
     except exceptions.NetworkError as e:
         print("Issue with a node:", e)
-
-
-def renameFTPFile(): # rename FTP files
-    with FTP("172.16.1.200") as ftp: # connect to ftp server
-        ftp.login('cisco') # ftp server username
-        files = ftp.nlst()
-        # for each new backup file on ftp server, write to local path here temporarily
-        # then, check for hostname, then rename file with hostname
-        for file in files:
-            if "-confg" in file: # we are only concerned about the initial files created by the switch
-                try:
-                    retr_file = 'RETR {}'.format(file)
-                    ftp.retrbinary(retr_file, open(file, 'wb').write) #temporarily write to current directory
-                except (error_perm, AttributeError):
-                    pass
-                with open(file, 'r') as f: # search hostname
-                    lines = f.readlines()
-                    for line in lines:
-                        if 'hostname' in line:
-                            hostname = line.split(" ")
-                            hostname = hostname[1].strip('\n') # remove extra return
-                ftp.rename(file, '{}-{}-{}-{}-{}-{}-{}'.format(hostname, time.hour, time.minute, time.second,
-                                                               time.month, time.day, time.year))
-                os.remove(file) # cleanup temp files
 
 
 
 
 if __name__ == '__main__':
     hostname = tasks.execute(getHostname)
+    #print(hostname)
     tasks.execute(getBackupCfg)
     tasks.disconnect_all()
-    renameFTPFile()
 
 
 
